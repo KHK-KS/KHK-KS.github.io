@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180 proj 1</title>
+    <title>Custom Fonts</title>
+    <style>
+        body {
+            font-family: 'Garamond';
+            margin-left: 10%;
+            margin-right: 10%;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        p {
+            text-align: left;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 50;
+            object-fit: cover;
+        }
+
+        .image-grid img {
+            width: 90%;
+        }
+
+        figure {
+            text-align: center;
+        }
+
+    </style>
+    </style>
+</head>
+<body>
+    <h1>CS 180 Project 1: Colorizing the Prokudin-Gorskii photo collection</h1>
+    <h3>Kevin Sheng</h3>
+    <hr>
+    <h3>Project Overview</h3>
+    <p>The goal of this project is to use the digitized Prokudin-Gorskii glass plate images to reconstruct the colored images. To achieve this, the image is divided into 3 chunks, with each corresponding to a color channel. The 3 filters are then overlaid on top of each other, which constructs the colored image.
+        The challenge comes in the form of alignment, or rather, misalignemnt. Due to the age and handcrafted nature of the images, if the channels are simply layered on top of each other, the resulting image contains significant visual artifacts.
+        As such, I needed to find a way to align these channels and minimize the visual artifacts.
+    </p>
+    <br>
+    <h3>Initial Approach</h3>
+    <p>As the issue of the channels lie in misalignment, I first experimented with different ways to calculate such misalignemnts. I implemented L2 Norm and Normalized Cross Correlation as ways to calculate the difference between two channels, and I then exhaustively searched across a range of (-15, 15) pixels of rollover in order to find the aligment that gives the least visual distortions.
+        As a note, since the images often contain borders, I also ignored 15% of the image on all four sides. This worked well for smaller images, such as <code>cathedral.jpg</code>, and other <code>jpgs</code>. However, images in <code>.tif</code> format have much higher resolution, and therefore may require a much larger shift in channels. For those, an exhausitve search is too time consuming to be practical.</p>
+    <br>
+    <h3>Image Pyramids</h3>
+    <p>Avoiding the prohibitively time-consuming exhaustive search approach, I implemented an image pyramid search to vastly speed up the processing of <code>.tif</code> images. I first downscaled the resolution of the images until both dimensions are no more than 256 pixels, then I performed the same exhausitve search as before. 
+        With the optimal shift now found for the lower resolution counterpart, I translated that shift to the higher resolution counterpart, then performed another exhaustive search, but only centered around the region of the shift. This vastly cuts down on processing time, as I kept the search range in the (-15, 15) region, and even though I may had to search multiple times, the time taken is still only a fraction of that if I expanded the range to be anywhere close to what a <code>.tif</code> image may need.</p>
+    <br>
+    <h3>Results and Comparisons</h3>
+    <p>As mentioned, I tried multiple different approaches when it comes to difference calculation, and they all gave varying results. With <code>emir.tif</code> as an example, both L2 and NCC gave subpar results when using the default configuration, where the red and green channels are aligned to the blue channel.
+    With that said, aligning the image to the green channel did fix the issue, and I went with this setting for all other images.</p>
+    <div class="image-grid">
+        <figure>
+            <img src="images/emir_l2_blue.jpg" alt="emir_l2_blue">
+            <figcaption><code>emir.tif</code> with L2 difference and blue-alignment</figcaption>
+        </figure>
+        <figure>
+            <img src="images/emir_ncc.jpg" alt="emir_ncc">
+            <figcaption><code>emir.tif</code> with NCC difference and blue-alignment</figcaption>
+        </figure>
+        <figure>
+            <img src="images/emir.jpg" alt="emir_l2_green">
+            <figcaption><code>emir.tif</code> with L2 difference and green-alignment</figcaption>
+        </figure>
+    </div>
+    <hr>
+    <h3>Final Results</h3>
+    <p>The final results displayed are all made with L2 difference and green-alignment. No additional post-processing or cropping are done.</p>
+    <br>
+    <div class="image-grid">
+        <figure>
+            <img src="images/cathedral.jpg">
+            <figcaption><b>cathedral</b> | B: (-5, -2) R: (7, 1)</figcaption>
+        </figure>
+        <figure>
+            <img src="images/tobolsk.jpg">
+            <figcaption><b>tobolsk</b> | B: (-3, -3) R: (4, 1)</figcaption>
+        </figure>
+        <figure>
+            <img src="images/monastery.jpg">
+            <figcaption><b>monastery</b> | B: (3, -2) G: (6, 1)</figcaption>
+        </figure>
+        <figure>
+            <img src="images/church.jpg">
+            <figcaption><b>church</b> | B: (-25, -4) R: (33, -8)</figcaption>
+        </figure>
+        <figure>
+            <img src="images/emir.jpg">
+            <figcaption><b>emir</b> | B: (-49, -24) R: (57, 17)</figcaption>
+        </figure>
+        <figure>
+            <img src="images/harvesters.jpg">
+            <figcaption><b>harvesters</b> | B: (-59, -17) R: (65, -3)</figcaption>
+        </figure>
+        <figure>
+            <img src="images/icon.jpg">
+            <figcaption><b>icon</b> | B: (-41, -17) R: (48, 5)</figcaption>
+        </figure>
+        <figure>
+            <img src="images/lady.jpg">
+            <figcaption><b>lady</b> | B: (-55, -9) R: (62, 4)</figcaption>
+        </figure>
+        <figure>
+            <img src="images/melons.jpg">
+            <figcaption><b>melons</b> | B: (-82, -11) R: (96, 3)</figcaption>
+        </figure>
+        <figure>
+            <img src="images/onion_church.jpg">
+            <figcaption><b>onion_church</b> | B: (-51, -27) R: (57, 10)</figcaption>
+        </figure>
+        <figure>
+            <img src="images/sculpture.jpg">
+            <figcaption><b>sculpture</b> | B: (-33, 11) R: (107, -16)</figcaption>
+        </figure>
+        <figure>
+            <img src="images/self_portrait.jpg">
+            <figcaption><b>self_portrait</b> | B: (-79, -29) R: (98, 8)</figcaption>
+        </figure>
+        <figure>
+            <img src="images/three_generations.jpg">
+            <figcaption><b>three_generations</b> | B:  (-53, -14) R: (59, -3)</figcaption>
+        </figure>
+        <figure>
+            <img src="images/train.jpg">
+            <figcaption><b>train</b> | B: (-43, -6) R: (43, 27)</figcaption>
+        </figure>
+    </div>
+    <hr>
+    <h3>Other Experimentations</h3>
+    <p>These are results from other forms of processing I tried. Some worked out, some didn't. L2 + green-alignment seems to be the most consistent parameters for all images, so that is the one I chose, but certain other approaches also produced interesting results.</p>
+    <br>
+    <div class="image-grid">
+        <figure>
+            <img src="images/default_church.jpg">
+            <figcaption>Default alignment for <code>church.jpg</code> with no shifts at all.</figcaption>
+        </figure>
+        <figure>
+            <img src="images/ncc_harvesters.jpg">
+            <figcaption>NCC blue-alignment for <code>harvesters.tif</code>. In reality, most of the images turned out fine with all approaches.</figcaption>
+        </figure>
+        <figure>
+            <img src="images/church_l2_blue.jpg">
+            <figcaption>L2 blue-alignment for <code>church.tif</code>. This was due to a bug in how I used <code>np.roll</code> to shift the channels.</figcaption>
+        </figure>
+        <figure>
+            <img src="images/green_emir.jpg">
+            <figcaption>L2 green-alignment for <code>emir.tif</code>. I accidentally inputted the blue channel as green, which caused his clothes to become green.</figcaption>
+        </figure>
+    
+    </div>
+</body>
+</html>
