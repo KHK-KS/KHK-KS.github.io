@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180 proj 1</title>
+    <title>Custom Fonts</title>
+    <style>
+        body {
+            font-family: 'Garamond';
+            margin-left: 10%;
+            margin-right: 10%;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        p {
+            text-align: left;
+        }
+
+        .image-container {
+            text-align: center;
+        }
+
+        .image-container img {
+            display: inline-block;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 50px;
+            justify-items: center;
+        }
+
+        .image-grid img {
+            width: 90%;
+            object-fit: fill;        
+        }
+
+        .small-image {
+            height: 50%;
+        }
+
+        figure {
+            text-align: center;
+        }
+
+    </style>
+    </style>
+</head>
+<body>
+    <h1>CS 180 Project 2: Fun with Filters and Frequencies</h1>
+    <h3>Kevin Sheng</h3>
+    <hr>
+    <h2>Project Overview</h2>
+    <p>The goal of this project is to use a variety of mathematical operations to edit images to achieve our desired effect. This can include sharpening or blurring images, merging images with different frequencies, or blending images along arbitrary borders.
+    </p>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>Part 1: Fun with Frequencies</h2>
+    <h3>Finite Difference Operator</h3>
+    <p>To begin, we first make use of the finite difference operators Dx and Dy to find partial derivatives of an image in the x and y direction. To do this, we concolve the image (in the form of an ndarray) with the finite difference operator. Note that if we are working with colored images, we might have to convolve channel by channel, depending on how the image is stored.</p>
+    <div class="image-grid">
+        <figure>
+            <img src="images/data/cameraman.png" alt="cameraman_og">
+            <figcaption>The original <code>cameraman.png</code></figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.1/cam_x.png" alt="cameraman_x">
+            <figcaption>The partial derivative of <code>cameraman.png</code> with respect to <code>Dx</code></figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.1/cam_y.png" alt="cameraman_y">
+            <figcaption>The partial derivative of <code>cameraman.png</code> with respect to <code>Dy</code></figcaption>
+        </figure>
+    </div>
+
+    <p>Now that we have both partial derivatives, we can use them to calculate the gradient magnitude of the image. After that, with some trial and error, we can find an arbitrary threshold to binarize the gradient magnitude, giving us the edges that are most prominent in the original image.</p>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/output/1.1/cameraman_gradient.jpg" alt="cameraman_grad">
+            <figcaption>The gradient as calculated from the partial derivatives</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.1/binarized_gradient.jpg" alt="binarized_gradient">
+            <figcaption>The binarized result, with the threshold being 50</figcaption>
+        </figure>
+    </div>
+
+    <p>We see that the binarized result is technically a valid set of edges, but it is quite noisy. To improve upon this, we can use a smoothing operator to get rid of the noise in the original image first. This is where the Gaussian filter comes in.</p>
+
+    <h3>Derivative of Gaussian (DoG) Filter</h3>
+
+    <p>To smooth the image, we can convolve the original with a gaussian filter <code>G </code>, and repeat the procedure in the previous part. This should give us clearer edges in our binarized gradient image.</p>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/output/1.2/blurred_cam.jpg" alt="cameraman_blurred">
+            <figcaption>The original <code>cameraman.png</code> convolved with a gaussian filter</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.2/blur_x.png" alt="cameraman_x">
+            <figcaption>The partial derivative of the blurred image with respect to <code>Dx</code></figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.2/blur_y.png" alt="cameraman_y">
+            <figcaption>The partial derivative of the blurred image with respect to <code>Dy</code></figcaption>
+        </figure>
+    </div>
+
+    <p>If we follow the same procedure again to calculate the gaussian magnitude and the binazired gaussian, we see that the resulting image has much clearer edges and much less noise. The magnitude of the gaussian also dropped, since we have less pixels with extreme values after we smoothed the image.</p>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/output/1.2/blur_gradient.jpg" alt="cameraman_grad">
+            <figcaption>The gradient as calculated from the partial derivatives of the blurred image</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.2/bin_blur_gradient.jpg" alt="binarized_gradient">
+            <figcaption>The binarized result, with the threshold being 10 this time, since the blurred gradient has much smaller values</figcaption>
+        </figure>
+    </div>
+
+    <p>An interesting property of this type of opertation is that since it is matrix algebra at its core, many of its steps are commutative and associative. What this means in context is that instead of convolving the original image with Dx and Dy and calculating the gradient with the two results, we can convolve them with the gaussian filter first, then use that to directly obtain the smoothed partial derivative. In many cases, this can save time since we're doing matrix operations on a much smaller scale.</p>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/output/1.2/gauss_dx.jpg" alt="gauss_dx">
+            <figcaption>The gaussian filter convolved with the <code>Dx</code> finite difference operator</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.2/gauss_dy.jpg" alt="gauss_dy">
+            <figcaption>The gaussian filter convolved with the <code>Dy</code> finite difference operator</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/output/1.2/dog_x.png" alt="dog_x">
+            <figcaption>The partial derivative obtained from the above DoG. Note it's the same as the original partial derivative</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.2/dog_y.png" alt="dog_y">
+            <figcaption>The partial derivative obtained from the above DoG. Note it's the same as the original partial derivative</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/output/1.2/dog_grad.jpg" alt="dog_grad">
+            <figcaption>The gradient magnitude from the partial derivatives above. Again, this is the same as the one from the original order of operations</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.2/bin_dog_grad.jpg" alt="bin_dog_grad">
+            <figcaption>The binarized result of the gradient magnitude to the left</figcaption>
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>Part 2: Fun with Frequencies</h2>
+    <h3>Image Sharpening</h3>
+
+    <p>Moving on to frequency manipulation, one way we can edit images through its frequencies is to "sharpen" it. By using a low pass Gaussian filter on an image, and subtracting that from the original, we have the image with all of its high frequencies retained. This usually looks like all the edges in an image.
+        By finding the edges in an image, then adding more emphasis on those edges, we can create a result where the details and differences between colors are more pronounced. The magnitude of the sharpening effect is determined by <code>alpha</code>, which is a measure of just how much we're adding the edges back to the image.</p>
+
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/data/taj.jpg" alt="taj">
+            <figcaption>The original <code>taj.jpg</code></figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/2.1/taj_blurred.jpg" alt="taj">
+            <figcaption>The blurred <code>taj.jpg</code></figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/2.1/taj_sharpened.jpg" alt="taj_sharpened">
+            <figcaption>The sharpened version of <code>taj.jpg</code>, with an alpha of 2.</figcaption>
+        </figure>
+    </div>
+
+    <p>Here are some other images I tried sharpening (zoom in to see detailed differences): </p>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/data/IMG_6057.jpg" alt="sqr">
+            <figcaption>A squirrel I found on campus</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/2.1/sqr_blurred.jpg" alt="taj">
+            <figcaption>The blurred version of said image</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/2.1/sqr_sharpened.jpg" alt="taj_sharpened">
+            <figcaption>The sharpened version of the original image, with an alpha of 5</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/data/campanile.jpg" alt="sqr">
+            <figcaption>Campanile</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/2.1/cmp_sharpened.jpg" alt="taj">
+            <figcaption>The sharpened version of the image, with an alpha of 5</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/output/2.1/cmp_blurred.jpg" alt="taj">
+            <figcaption>Blurred version</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/2.1/cmp_blurred_sharpened.jpg" alt="taj_sharpened">
+            <figcaption>Sharpening the blurred version, with an alpha of 5</figcaption>
+        </figure>
+    </div>
+
+    <h3>Hybrid Images</h3>
+
+    <p>Another result of frequency manipulation is the creation of hybrid images. If we stack the low frequencies of one image with the high frequencies of another image, we can create a hybrid image. Since we are sensitive to different frequencies at different distances, this means we will be able to see the high frequency image more clearly when we are closer up, and the low frequency image when we are farther away.</p>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/data/nutmeg.jpg" alt="nutmeg">
+            <figcaption>Nutmeg the cat</figcaption>
+        </figure>
+        <figure>
+            <img src="images/data/DerekPicture.jpg" alt="derek" class="small-image">
+            <figcaption>Derek the human</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/2.2/derek_nutmeg.jpeg" alt="derek_nutmeg">
+            <figcaption>The hybrid image of the two, with Nutmeg being in the lower frequencies and Derek in the higher frequencies</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/data/happy_guy.jpg" alt="happy">
+            <figcaption>Happy guy</figcaption>
+        </figure>
+        <figure>
+            <img src="images/data/angry_guy.jpg" class="angry_guy">
+            <figcaption>Angry guy</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/2.2/happy_angry.jpeg" alt="happy_angry">
+            <figcaption>The hybrid image of the two</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/data/henk.jpg" alt="henk">
+            <figcaption>My friend Henk</figcaption>
+        </figure>
+        <figure>
+            <img src="images/data/henk_filter.jpg"class="henk_filter">
+            <figcaption>Henk with a filter</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/2.2/henk.jpeg" alt="henk">
+            <figcaption>The hybrid image of the two</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/data/cat.jpg" alt="cat">
+            <figcaption>Literally me</figcaption>
+        </figure>
+        <figure>
+            <img src="images/data/borzoi.jpg" alt="derek">
+            <figcaption>Borzoi</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/2.2/cat_borzoi.jpeg" alt="cat_borzoi">
+            <figcaption>The hybrid image of the two</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/output/2.2/cat_fourier.jpeg" alt="cat">
+            <figcaption>Fourier transform of the original cat image</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/2.2/borzoi_fourier.jpeg" alt="borz">
+            <figcaption>Fourier transform of the original borzoi image</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/output/2.2/cat_filtered.jpeg" alt="cat">
+            <figcaption>Fourier transform of the gaussian filtered cat image</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/2.2/borzoi_filtered.jpeg" alt="borz">
+            <figcaption>Fourier transform of the gaussian filtered borzoi image</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/output/2.2/cat_borzoi_fourier.jpeg" alt="cat_borz">
+            <figcaption>Fourier transform of the final hybrid image</figcaption>
+        </figure>
+    </div>
+
+    <p>Here's an example of a failed hybrid image. I believe the primary reason of the failure is the difference in size of the two images, as much of the detail was lost when the two images were aligned. This means the filter cannot capture enough information for the images to be distinguishable. </p>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/data/cat.jpg" alt="cat">
+            <figcaption>Me again</figcaption>
+        </figure>
+        <figure>
+            <img src="images/data/cat_shower.jpg" alt="derek">
+            <figcaption>Cat showering</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/2.2/cat_cat_shower.jpeg" alt="cat_borzoi">
+            <figcaption>The hybrid image of the two</figcaption>
+        </figure>
+    </div>
+
+    <h2>Multi-resolution Blending and the Oraple journey</h2>
+
+    <h3>Gaussian and Laplacian Stacks</h3>
+
+    <p>Moving on from hybrid images, frequency manipulation can also be used to selectively merge different sections of images. This is done with multi-resolution blending, where we apply successive layers of gaussian and laplacian filters to the original image.</p>
+
+    <div class="image-container">
+        <img src="images/output/2.3/apple_gauss.jpeg" alt="apple_gauss">
+        <figcaption>The gaussian layers of the apple image</figcaption>
+    </div>
+
+    <br>
+    <br>
+
+    <div class="image-container">
+        <img src="images/output/2.3/apple_lap.jpeg" alt="apple_gauss">
+        <figcaption>The laplacian layers of the apple image. Note that the final layer is taken from the gaussian stack </figcaption>
+    </div>
+
+    <br>
+    <br>
+
+    <div class="image-container">
+        <img src="images/output/2.3/masks.jpeg" alt="apple_gauss">
+        <figcaption>The masks for each laplacian layer. This is also formed by using a gaussian filter on the original mask </figcaption>
+    </div>
+
+    <br>
+    <br>
+
+    <div class="image-container">
+        <img src="images/output/2.3/apple_layers.jpeg" alt="apple_gauss">
+        <figcaption>The layers of laplacian being combined with the masks for the apple side</figcaption>
+    </div>
+
+    <br>
+    <br>
+
+    <div class="image-container">
+        <img src="images/output/2.3/orange_layers.jpeg" alt="apple_gauss">
+        <figcaption>The layers of laplacian being combined with the masks for the orange side</figcaption>
+    </div>
+
+    <br>
+    <br>
+
+    <div class="image-container">
+        <img src="images/output/2.4/oraple.jpeg" alt="apple_gauss">
+        <figcaption>The glorious final result</figcaption>
+    </div>
+
+    <p>Here are some other images I blended:</p>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/data/ggd.jpg" alt="cat">
+            <figcaption>Golden Gate in the day</figcaption>
+        </figure>
+        <figure>
+            <img src="images/data/ggn.jpg" alt="derek">
+            <figcaption>Golden Gate at night</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/2.4/gg_mixed.png" alt="cat_borzoi">
+            <figcaption>The blended image of the two</figcaption>
+        </figure>
+    </div>
+    
+    <div class="image-grid">
+        <figure>
+            <img src="images/data/oraple.jpg" alt="cat">
+            <figcaption>The oraple padded with blank space</figcaption>
+        </figure>
+        <figure>
+            <img src="images/data/oraple_mask.jpg" alt="derek">
+            <figcaption>The irregular mask used for this blend</figcaption>
+        </figure>
+        <figure>
+            <img src="images/data/biden.jpg" alt="cat_borzoi">
+            <figcaption>Biden blast</figcaption>
+        </figure>
+    </div>
+    
+    <br>
+    <br>
+
+    <div class="image-container">
+        <img src="images/output/2.4/biden_oraple.png" alt="apple_gauss">
+        <figcaption>My honest reaction after completing project 2</figcaption>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h3>Learnings</h3>
+
+    <p>Overall, this is a very fun and rewarding project. Seeing images being processed and blended/mixed/sharpened is incredibly interesting, and I got to create some funny results as well.
+        I think the most important learning comes in the form of my deepened understanding of the relationship between images and frequencies. Before this, I always knew they are somehow related, but I never thought about the details. Now that I've done this, I can confidently say that I have a much better grasp on how images are stored, edited, and displayed.
+    </p>
+    
+</body>
+</html>
