@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180 proj 3</title>
+    <title>Custom Fonts</title>
+    <style>
+        body {
+            font-family: 'Garamond';
+            margin-left: 10%;
+            margin-right: 10%;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        p {
+            text-align: left;
+        }
+
+        .image-container {
+            text-align: center;
+        }
+
+        .image-container img {
+            width: 35%;
+            display: inline-block;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            justify-items: center;
+        }
+
+        .image-grid img {
+            width: 60%;
+            object-fit: fill;        
+        }
+
+        .small-image {
+            height: 30%;
+        }
+            
+        figure {
+            text-align: center;
+        }
+
+    </style>
+    </style>
+</head>
+<body>
+    <h1>CS 180 Project 3: Face Morphing</h1>
+    <h3>Kevin Sheng</h3>
+    <hr>
+    <h2>Project Overview</h2>
+    <p>The goal of this project is to produce a "morph" animation of my face into someone else's face, compute the mean of a population of faces and extrapolate from a population mean to create a caricature of myself.</p>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>Part 1: Defining Correspondences</h2>
+    <p>Below are the images I picked, and the correspondences I picked. I focused on mapping critical features such as eyes and nose to each other, so the transition can be as smooth as possible. After picking the correspondences, I then found the Delaunay Triangulation of the points. It's important to use the same triangulation on both sets of points, as it can otherwise lead to warping issues.</p>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/data/henk.jpg" alt="henk">
+            <figcaption>Picture of my friend Henk</figcaption>
+        </figure>
+        <figure>
+            <img src="images/data/kevin.jpg" alt="kevin">
+            <figcaption>Picture of myself</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/henk_dlny.jpg" alt="henk">
+            <figcaption>Correspondences and triangulation</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/kevin_dlny.jpg" alt="kevin">
+            <figcaption>Correspondences and triangulation</figcaption>
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>Part 2: Computing the "Mid-way Face"</h2>
+    <p>To compute the midway face, we need to consider both the warping and the coloration of the end product. To make sure that the features of both images match up, we first calculate the midway correspondence points by averaging the two sets of correspondences, then calculate the affine matrices that transform the original coordinates to the midway coordinates.
+        We then invert those matrices to get the original region for any given region in the midway image. After that, we sample the pixel values of the original regions, then average them to find the resulting value for our midway region.
+    </p>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/data/henk.jpg" alt="henk">
+            <figcaption>Picture of my friend Henk</figcaption>
+        </figure>
+        <figure>
+            <img src="images/data/kevin.jpg" alt="kevin">
+            <figcaption>Picture of myself</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/midway_face.jpg" alt="henk">
+            <figcaption>The midway face of me and Henk</figcaption>
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>Part 3: The Morph Sequence</h2>
+    <p>Using the techniques described in part 2, we can tweak parameters in order to create a progression of face morphs. Instead of averaging the warp and the color, we can set specific weights to both images to emphasize or de-emphasize their features. Connecting many of these morphs creates a sequence of visually smooth face morphs.</p>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/morph_sequence.gif" alt="henk">
+            <figcaption>The morph sequence from Henk to me</figcaption>
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>Part 4: The "Mean face" of a population</h2>
+    <p>For this part, I used the publically available Danes dataset and analyzed the mean face of a wider population. The dataset itself contains 37 images, and the correspondence points are already marked and stored in files. The process of finding a mean face is 
+        functionally the same as those of the midway face, just with more than 2 images, and equal weight for each image. I calculated the mean face of the female participants in the dataset, and fitted individual images to the mean correspondence points.
+    </p>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/data/danes/08-1f.bmp" alt="12f">
+            <figcaption>Original image</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/p5_midway_face_1.jpg" alt="12f">
+            <figcaption>Image warped to the mean face geometry</figcaption>
+        </figure>
+        <figure>
+            <img src="images/data/danes/30-1f.bmp" alt="30f">
+            <figcaption>Original image</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/p5_midway_face_2.jpg" alt="12f">
+            <figcaption>Image warped to the mean face geometry</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/dane_mean_female_face.jpg" alt="henk">
+            <figcaption>The mean face of the female participants in the Danes dataset</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/output/me_to_mean_female_dane.jpg" alt="12f">
+            <figcaption>My face warped to the mean face geometry</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/mean_female_dane_to_me.jpg" alt="12f">
+            <figcaption>The mean face warped to my face geometry</figcaption>
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>Part 5. Caricatures: Extrapolating from the mean</h2>
+    <p>For this part, instead of interpolating the geometry and creating midway faces, we extrapolate it to exaggerate specific features in the correspondence points. To do this, I subtracted the mean dane female face geometry from my own face geometry, then added that back to my geometry, scaling with a certain alpha value.
+        Depending on the alpha, certain features of my face gets more exaggerated.
+    </p>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/output/extrapolate_1.1.jpg" alt="12f">
+            <figcaption>Extrapolating with alpha = 1.1</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/extrapolate_1.5.jpg" alt="12f">
+            <figcaption>Extrapolating with alpha = 1.5</figcaption>
+        </figure>
+    </div>
+
+    <h2>Bells and Whistles</h2>
+    <p>For bells and whistles, I decided to morph my face onto the average chinese female. I found the image <a href="https://pmsol3.wordpress.com/2009/10/10/world-of-facial-averages-east-southeast-asia-pacific-islander/">here</a>, and annotated a new set of correspondences to both my own picture and the image.
+    After some cropping, I was able to apply the morph to my face.</p>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/data/acw_cropped.jpg" alt="12f">
+            <figcaption>The average chinese female, cropped for simpler processing</figcaption>
+        </figure>
+        <figure>
+            <img src="images/data/kevin_cropped_2.jpg" alt="12f">
+            <figcaption>My cropped picture</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/acw_dlny.jpg" alt="12f">
+            <figcaption>The delaunay triangulation of the average chinese female</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/kev_dlny.jpg" alt="12f">
+            <figcaption>The delaunay triangulation of my picture</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/me_acw_color.jpg" alt="12f">
+            <figcaption>Morphing just the shape of the image to my face</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/me_acw_shape.jpg" alt="12f">
+            <figcaption>Morphing just the color of the image to my face</figcaption>
+        </figure>    
+    </div>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/me_acw_both.jpg" alt="both", width="200">
+            <figcaption>Morphing both the shape and color to my face</figcaption>
+        </figure>
+    </div>
+    
+</body>
+</html>
