@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180 proj 4A</title>
+    <title>Custom Fonts</title>
+    <style>
+        body {
+            font-family: 'Garamond';
+            margin-left: 10%;
+            margin-right: 10%;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        p {
+            text-align: left;
+        }
+
+        .image-container {
+            text-align: center;
+        }
+
+        .image-container img {
+            width: 50%;
+            display: inline-block;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            justify-items: center;
+        }
+
+        .image-grid img {
+            width: 80%;
+            object-fit: fill;        
+        }
+
+        .small-image {
+            height: 30%;
+        }
+            
+        figure {
+            text-align: center;
+        }
+
+    </style>
+    </style>
+</head>
+<body>
+    <h1>CS 180 Project 4A: Image Morphing and Mosaicing</h1>
+    <h3>Kevin Sheng</h3>
+    <hr>
+    <h2>Project Overview</h2>
+    <p>The goal of this project is to further my understanding of image representation and manipulation, and produce large sections of image that is the product of multiple individual images stitched together.</p>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>Part 0: Shooting Pictures</h2>
+
+    <p>Before we begin processing the images, we need images that satisfy certain properties, as not any two images can be stitched together seamlessly. Ideally, the images should have a good amount of overlap and similar lighting. Below are some of the images I used:</p>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/data/per1.jpg">
+        </figure>
+        <figure>
+            <img src="images/data/per2.jpg">
+        </figure>
+        <figure>
+            <img src="images/data/warp_2_1.jpg">
+        </figure>
+        <figure>
+            <img src="images/data/warp_2_2.jpg">
+        </figure>
+    </div>
+
+
+    <br>
+    <hr>
+    <br>
+
+
+    <h2>Part 1: Recovering Homographies & Warping Images</h2>
+
+    <p>The pairs of photos are shot from the same center of projection, but have different angles, so the first task is to recover the homography that warps one image into the perspective of the other. This can be done by solving a system of equations, similar to what we did in project 3. What is different, however, is the fact that this process is highly susceptible to noise. 
+        As such, although using 4 points as reference is technically fine, it would need to be extremely accurate. As such, I opted to use multiple correspondences (usually in the double digits), and solve the overconstrained system with least squares. The rest of the warping process is similar to project 3,
+         where we use inverse warping to set both images into the same perspective.
+    </p>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/warped_im.jpg" alt="both">
+            <figcaption>The first image, warped into the perspective of the second</figcaption>
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>Part 2: Rectification</h2>
+
+    <p>To make sure that our warp function is functioning properly, we can take pictures of any object and warp them into arbitrary shapes. One example is taking pictures of rectangular objects from an angle, and rectifying the image such that the object rectangular again. 
+        Since we're only working with one image, we can set the correspondence of the image to be the corners of said rectangle, and use an arbitrary set of rectanglular or square coordinates. For the examples below, I used a set of square coordinates, so the door is also compressed into a square shape.
+    </p>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/data/square.jpg">
+        </figure>
+        <figure>
+            <img src="images/output/rect_im_1.jpg">
+        </figure>
+        <figure>
+            <img src="images/data/rect_2.jpg">
+        </figure>
+        <figure>
+            <img src="images/output/rect_im_2.jpg">
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>Part 3: Image Mosaicing</h2>
+
+    <p>Now that we know our function is working as intended, I can use it to stitch images together. To do so, I warp images similarly to how I did it in part 1, and shift the second image so the features match up. 
+        To ensure a smooth transition, I also blended the overlapping regions of the two images. Unfortunately, even though the blending worked for most parts, some images still came out with visible edges, as the lighting for the two images were different.
+    </p>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/stitched_1.jpg">
+        </figure>
+    </div>
+
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/stitched_2.jpg">
+        </figure>
+    </div>
+
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/stitched_3.jpg">
+        </figure>
+    </div>
+    
+
+</body>
+</html>
