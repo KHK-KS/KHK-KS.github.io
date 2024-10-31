@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180 proj 4</title>
+    <title>Custom Fonts</title>
+    <style>
+        body {
+            font-family: 'Garamond';
+            margin-left: 10%;
+            margin-right: 10%;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        p {
+            text-align: left;
+        }
+
+        .image-container {
+            text-align: center;
+        }
+
+        .image-container img {
+            width: 50%;
+            display: inline-block;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            justify-items: center;
+        }
+
+        .image-grid img {
+            width: 80%;
+            object-fit: contain;        
+        }
+
+        .small-image {
+            height: 30%;
+        }
+            
+        figure {
+            text-align: center;
+        }
+
+    </style>
+    </style>
+</head>
+<body>
+    <h1>CS 180 Project 4</h1>
+    <h3>Kevin Sheng</h3>
+    <hr>
+    <h1>CS 180 Project 4A: Image Morphing and Mosaicing</h1>
+
+    <h2>Project Overview</h2>
+    <p>The goal of this project is to further my understanding of image representation and manipulation, and produce large sections of image that is the product of multiple individual images stitched together.</p>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>Part 0: Shooting Pictures</h2>
+
+    <p>Before we begin processing the images, we need images that satisfy certain properties, as not any two images can be stitched together seamlessly. Ideally, the images should have a good amount of overlap and similar lighting. Below are some of the images I used:</p>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/data/per1.jpg">
+        </figure>
+        <figure>
+            <img src="images/data/per2.jpg">
+        </figure>
+        <figure>
+            <img src="images/data/warp_2_1.jpg">
+        </figure>
+        <figure>
+            <img src="images/data/warp_2_2.jpg">
+        </figure>
+    </div>
+
+
+    <br>
+    <hr>
+    <br>
+
+
+    <h2>Part 1: Recovering Homographies & Warping Images</h2>
+
+    <p>The pairs of photos are shot from the same center of projection, but have different angles, so the first task is to recover the homography that warps one image into the perspective of the other. This can be done by solving a system of equations, similar to what we did in project 3. What is different, however, is the fact that this process is highly susceptible to noise. 
+        As such, although using 4 points as reference is technically fine, it would need to be extremely accurate. As such, I opted to use multiple correspondences (usually in the double digits), and solve the overconstrained system with least squares. The rest of the warping process is similar to project 3,
+         where we use inverse warping to set both images into the same perspective.
+    </p>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/warped_im.jpg" alt="both">
+            <figcaption>The first image, warped into the perspective of the second</figcaption>
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>Part 2: Rectification</h2>
+
+    <p>To make sure that our warp function is functioning properly, we can take pictures of any object and warp them into arbitrary shapes. One example is taking pictures of rectangular objects from an angle, and rectifying the image such that the object rectangular again. 
+        Since we're only working with one image, we can set the correspondence of the image to be the corners of said rectangle, and use an arbitrary set of rectanglular or square coordinates. For the examples below, I used a set of square coordinates, so the door is also compressed into a square shape.
+    </p>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/data/square.jpg">
+        </figure>
+        <figure>
+            <img src="images/output/rect_im_1.jpg">
+        </figure>
+        <figure>
+            <img src="images/data/rect_2.jpg">
+        </figure>
+        <figure>
+            <img src="images/output/rect_im_2.jpg">
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>Part 3: Image Mosaicing</h2>
+
+    <p>Now that we know our function is working as intended, I can use it to stitch images together. To do so, I warp images similarly to how I did it in part 1, and shift the second image so the features match up. 
+        To ensure a smooth transition, I also blended the overlapping regions of the two images. Unfortunately, even though the blending worked for most parts, some images still came out with visible edges, as the lighting for the two images were different.
+    </p>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/stitched_1.jpg">
+        </figure>
+    </div>
+
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/stitched_2.jpg">
+        </figure>
+    </div>
+
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/stitched_3.jpg">
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h1>CS 180 Project 4B: Feature Matching for Autostitching</h1>
+
+    <h2>Project Overview</h2>
+    <p>The goal of this project is to create a system for automatically stitching images into a mosaic. A secondary goal is to learn how to read and implement a research paper.</p>
+
+    <h2>Part 1: Corner Detection</h2>
+
+    <p>Starting off, we want to find significant points in the image, which are corners that define certain changes. To do this, we use Harris Interest Point Detector. Below is an example of corners detected in an image.</p>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/per1_harris.jpg">
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>Part 2: Adaptive Non-maximal Suppression (ANMS)</h2>
+    <p>As one can see, there are so many corners in the previous image they essentially cover everything. To improve our results and speed up computation, we pick out the important corners from all the ones detected above using ANMS. 
+        In my implementation, I calculated the L2 distance between any given corner and all other corners with a stronger h ("strength" of a corner as determined by HIPD). To suppress neighbors of a particularly strong corner, we first multiply 
+        the h by a constant to find those corners, then we calculate the distance to the nearest neighbor that is stronger. We take the first 500 corners with the largest neighbor distances to ensure an even spread of corners throughout the image.
+    </p>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/per1_anms.jpg">
+        </figure>
+    </div>
+    
+    <br>
+    <hr>
+    <br>
+
+    <h2>Part 3: Feature Descriptor Extraction & Matching</h2>
+
+    <p>To match corners between the images, we extract a patch of information around each corner, and use those information to find the closest match for a point in the other image. In my case, I picked a patch of 40 * 40 pixels around each corner, downscaled them to 8 * 8 pixels, then normalize them.
+        I did this to each corner in both images, then cross compared the L2 distance between corners in either images. To minimize false positives, we use Lowe's trick and only admit a valid matching if the L2_nearest / L2_second is less than a given constant. After all this, the corners with reciprocal matches
+         in both images are the true pairings.
+    </p>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/per1_features_raw.jpg">
+            <figcaption>A sample of the condensed features for some corners</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/feature_matching_0.8.jpg">
+            <figcaption>Matching pairs with Lowe's threshold of 0.8</figcaption>
+        </figure>
+    </div>
+
+    <br>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/feature_matching_0.5.jpg">
+            <figcaption>Matching pairs with Lowe's threshold of 0.5</figcaption>
+
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>Part 4: RANSAC and Stitching</h2>
+
+    <p>The previous part provided a solid set of matching corners, but there are still outliers that can heavily skew the result. To further filter our matches, we use RANSAC to identify outliers and remove them from our set. For each RANSAC iteration, we select 4 random pairs 
+        of points, compute homography H from those, and compile the error of the said homography in the form of SSD. If the SSD is more than some threshold, we know those points are likely to be outliers, and thus reject them. I repeat this process for 10000 times to make sure 
+        no outliers are present in our final dataset. At last, we use the pure dataset to compute the overall H, and use that to stitch our images.
+    </p>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/RANSAC_2_per3.jpg">
+            <figcaption>Matching pairs after RANSAC</figcaption>
+        </figure>
+    </div>
+
+    <p>Below are the comparison of manualy stitching versus autostitching:</p>
+
+    <div class="image-grid">
+        <figure>
+            <img src="images/output/stitched_1.jpg">
+        </figure>
+        <figure>
+            <img src="images/output/per1_stitched.jpg">
+        </figure>
+        <figure>
+            <img src="images/output/stitched_2.jpg">
+        </figure>
+        <figure>
+            <img src="images/output/per2_stitched.jpg">
+        </figure>
+        <figure>
+            <img src="images/output/stitched_3.jpg">
+        </figure>
+        <figure>
+            <img src="images/output/per3_stitched.jpg">
+        </figure>
+    </div>
+
+
+</body>
+</html>
