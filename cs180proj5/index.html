@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180 proj 5</title>
+    <title>Custom Fonts</title>
+    <style>
+        body {
+            font-family: 'Garamond';
+            margin-left: 10%;
+            margin-right: 10%;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        p {
+            text-align: left;
+        }
+
+        .image-container {
+            text-align: center;
+        }
+
+        .image-container img {
+            width: 500px;
+            display: inline-block;
+        }
+
+        .image-grid-1 {
+            justify-items: center;
+        }
+
+        .image-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            justify-items: center;
+        }
+
+        .image-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            justify-items: center;
+        }
+
+        .image-grid-5 {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-grid-6 {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-grid-1 img {
+            width: 200px;
+            height: auto;
+            object-fit: cover;       
+        }
+
+        .image-grid-2 img {
+            width: 200px;
+            height: auto;
+            object-fit: cover;        
+        }
+
+        .image-grid-3 img {
+            width: 200px;
+            height: auto;
+            object-fit: cover;   
+        }
+
+        .image-grid-4 img {
+            width: 200px;
+            height: auto;
+            object-fit: cover;   
+        }
+        
+        .image-grid-5 img {
+            width: 200px;
+            height: auto;
+            object-fit: cover;        
+        }
+
+        .image-grid-6 img {
+            width: 200px;
+            height: auto;
+            object-fit: cover;        
+        }
+
+        .small-image {
+            height: 30%;
+        }
+            
+        figure {
+            text-align: center;
+        }
+
+    </style>
+    </style>
+</head>
+<body>
+    <h1>CS 180 Project 5</h1>
+    <h3>Kevin Sheng</h3>
+    <hr>
+    <h1>CS 180 Project 5: Fun with Diffusion Models</h1>
+
+    <h2>Project Overview</h2>
+    <p>The goal of this project is to further my understanding of image representation and manipulation, and produce large sections of image that is the product of multiple individual images stitched together.</p>
+
+    <br>
+    <hr>
+    <br>
+
+
+    <h2>Part 0: Setup</h2>
+
+    <p>We first set up the diffusion model. The random seed used for this project is 61.</p>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/0/20_small.jpg">
+            <figcaption>The 64*64 images with inference step values of 20</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/0/20_large.jpg">
+            <figcaption>The 256*256 images with inference step values of 20</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/0/30_small.jpg">
+            <figcaption>The 64*64 images with inference step values of 30</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/output/0/30_large.jpg">
+            <figcaption>The 256*256 images with inference step values of 30</figcaption>
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h1>Part 1: Sampling Loops</h1>
+
+    <br>
+    <hr>
+    <br>
+
+
+    <h2>1.1: Implementing the Forward Process</h2>
+
+    <p>To start off, we introduce noise into our test image with the forward process.</p>
+
+    <div class="image-grid-2">
+        <figure>
+            <img src="images/output/test_image.jpg">
+            <figcaption>The original test image</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.1/noisy_250.jpg">
+            <figcaption>Noise at t=250</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.1/noisy_500.jpg">
+            <figcaption>Noise at t=500</figcaption>
+
+        </figure>
+        <figure>
+            <img src="images/output/1.1/noisy_750.jpg">
+            <figcaption>Noise at t=750</figcaption>
+
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>1.2: Classical Denoising</h2>
+
+    <p>To start denoising, we can first try the classical gaussian blur filtering.</p>
+
+    <div class="image-grid-3">
+        <figure>
+            <img src="images/output/1.1/noisy_250.jpg">
+            <figcaption>Noise at t=250</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.1/noisy_500.jpg">
+            <figcaption>Noise at t=500</figcaption>
+
+        </figure>
+        <figure>
+            <img src="images/output/1.1/noisy_750.jpg">
+            <figcaption>Noise at t=750</figcaption>
+
+        </figure>
+    </div>
+
+    <div class="image-grid-3">
+        <figure>
+            <img src="images/output/1.2/gauss_250.jpg">
+            <figcaption>Gaussian blur denoising at t=250</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.2/gauss_500.jpg">
+            <figcaption>Gaussian blur denoising at t=500</figcaption>
+
+        </figure>
+        <figure>
+            <img src="images/output/1.2/gauss_750.jpg">
+            <figcaption>Gaussian blur denoising at t=750</figcaption>
+
+        </figure>
+    </div>
+
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>1.3: One-Step Denoising</h2>
+
+    <p>Now, we can actually use the diffusion model to denoise the images. We can start off by using one step denoising.</p>
+
+    <div class="image-grid-1">
+        <figure>
+            <img src="images/output/test_image.jpg">
+            <figcaption>The original test image</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid-3">
+        <figure>
+            <img src="images/output/1.1/noisy_250.jpg">
+            <figcaption>Noise at t=250</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.1/noisy_500.jpg">
+            <figcaption>Noise at t=500</figcaption>
+
+        </figure>
+        <figure>
+            <img src="images/output/1.1/noisy_750.jpg">
+            <figcaption>Noise at t=750</figcaption>
+
+        </figure>
+    </div>
+
+    <div class="image-grid-3">
+        <figure>
+            <img src="images/output/1.3/clean_est_250.jpg">
+            <figcaption>One-step denoising at t=250</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.3/clean_est_500.jpg">
+            <figcaption>One-step denoising at t=500</figcaption>
+
+        </figure>
+        <figure>
+            <img src="images/output/1.3/clean_est_750.jpg">
+            <figcaption>One-step denoising at t=750</figcaption>
+
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>1.4: Iterative Denoising</h2>
+
+    <p>Diffusion models are designed to denoise iteratively. In this part we will implement this.</p>
+
+    <div class="image-grid-5">
+        <figure>
+            <img src="images/output/1.4/iterative_90.jpg">
+            <figcaption>Noisy Campanile at t=90</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.4/iterative_240.jpg">
+            <figcaption>Noisy Campanile at t=240</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.4/iterative_390.jpg">
+            <figcaption>Noisy Campanile at t=390</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.4/iterative_540.jpg">
+            <figcaption>Noisy Campanile at t=540</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.4/iterative_690.jpg">
+            <figcaption>Noisy Campanile at t=690</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid-4">
+        <figure>
+            <img src="images/output/test_image.jpg">
+            <figcaption>The original test image</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.4/iterative_0.jpg">
+            <figcaption>Iteratively denoised Campanile</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.4/clean_one_step.jpg">
+            <figcaption>One-step denoised Campanile</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.4/blur_gaussian.jpg">
+            <figcaption>Gaussian blur filtered Campanile</figcaption>
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>1.5: Diffusion Model Sampling</h2>
+
+    <p>In part 1.4, we use the diffusion model to denoise an image. Another thing we can do with the iterative_denoise function is to generate images from scratch.</p>
+
+    <div class="image-grid-5">
+        <figure>
+            <img src="images/output/1.5/sampling_0.jpg">
+            <figcaption>Sample 1</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.5/sampling_1.jpg">
+            <figcaption>Sample 2</figcaption>
+        </figure><figure>
+            <img src="images/output/1.5/sampling_2.jpg">
+            <figcaption>Sample 3</figcaption>
+        </figure><figure>
+            <img src="images/output/1.5/sampling_3.jpg">
+            <figcaption>Sample 4</figcaption>
+        </figure><figure>
+            <img src="images/output/1.5/sampling_4.jpg">
+            <figcaption>Sample 5</figcaption>
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>1.6: Classifier-Free Guidance (CFG)</h2>
+
+    <p>In order to greatly improve image quality (at the expense of image diversity), we can use a technicque called Classifier-Free Guidance.</p>
+
+    <div class="image-grid-5">
+        <figure>
+            <img src="images/output/1.6/cfg_1.jpg">
+            <figcaption>Sample 1 with CFG</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.6/cfg_2.jpg">
+            <figcaption>Sample 2 with CFG</figcaption>
+        </figure><figure>
+            <img src="images/output/1.6/cfg_3.jpg">
+            <figcaption>Sample 3 with CFG</figcaption>
+        </figure><figure>
+            <img src="images/output/1.6/cfg_4.jpg">
+            <figcaption>Sample 4 with CFG</figcaption>
+        </figure><figure>
+            <img src="images/output/1.6/cfg_5.jpg">
+            <figcaption>Sample 5 with CFG</figcaption>
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>1.7: Image-to-image Translation</h2>
+
+    <p>In part 1.4, we take a real image, add noise to it, and then denoise. This effectively allows us to make edits to existing images. 
+        Here, we're going to take the original test image, noise it a little, and force it back onto the image manifold without any conditioning. Effectively, we're going to get an image that is similar to the test image (with a low-enough noise level).
+    </p>
+
+    <div class="image-grid-1">
+        <figure>
+            <img src="images/output/test_image.jpg">
+            <figcaption>The original image</figcaption>
+        </figure>
+    </div>
+
+
+    <div class="image-grid-3">
+        <figure>
+            <img src="images/output/1.7/img_tl_1.jpg">
+            <figcaption>SDEdit with i_start=1</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7/img_tl_3.jpg">
+            <figcaption>SDEdit with i_start=3</figcaption>
+        </figure><figure>
+            <img src="images/output/1.7/img_tl_5.jpg">
+            <figcaption>SDEdit with i_start=5</figcaption>
+        </figure><figure>
+            <img src="images/output/1.7/img_tl_7.jpg">
+            <figcaption>SDEdit with i_start=7</figcaption>
+        </figure><figure>
+            <img src="images/output/1.7/img_tl_10.jpg">
+            <figcaption>SDEdit with i_start=10</figcaption>
+        </figure><figure>
+            <img src="images/output/1.7/img_tl_20.jpg">
+            <figcaption>SDEdit with i_start=20</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid-1">
+        <figure>
+            <img src="images/output/1.7/cat_original.jpg">
+            <figcaption>The original image</figcaption>
+        </figure>
+    </div>
+
+
+    <div class="image-grid-3">
+        <figure>
+            <img src="images/output/1.7/cat_tl_1.jpg">
+            <figcaption>SDEdit with i_start=3</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7/cat_tl_3.jpg">
+            <figcaption>SDEdit with i_start=5</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7/cat_tl_5.jpg">
+            <figcaption>SDEdit with i_start=7</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7/cat_tl_7.jpg">
+            <figcaption>SDEdit with i_start=10</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7/cat_tl_10.jpg">
+            <figcaption>SDEdit with i_start=20</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7/cat_tl_20.jpg">
+            <figcaption>SDEdit with i_start=1</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid-1">
+        <figure>
+            <img src="images/output/1.7/cat_shower_original.jpg">
+            <figcaption>The original image</figcaption>
+        </figure>
+    </div>
+
+
+    <div class="image-grid-3">
+        <figure>
+            <img src="images/output/1.7/cat_shower_tl_1.jpg">
+            <figcaption>SDEdit with i_start=3</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7/cat_shower_tl_3.jpg">
+            <figcaption>SDEdit with i_start=5</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7/cat_shower_tl_5.jpg">
+            <figcaption>SDEdit with i_start=7</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7/cat_shower_tl_7.jpg">
+            <figcaption>SDEdit with i_start=10</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7/cat_shower_tl_10.jpg">
+            <figcaption>SDEdit with i_start=20</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7/cat_shower_tl_20.jpg">
+            <figcaption>SDEdit with i_start=1</figcaption>
+        </figure>
+    </div>
+
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>1.7.1: Editing Hand-Drawn and Web Images</h2>
+
+    <p>This procedure works particularly well if we start with a nonrealistic image (e.g. painting, a sketch, some scribbles) and project it onto the natural image manifold.</p>
+
+    <div class="image-grid-1">
+        <figure>
+            <img src="images/output/1.7.1/avo_original.jpg">
+            <figcaption>The original image</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid-3">
+        <figure>
+            <img src="images/output/1.7.1/avocado_960.jpg">
+            <figcaption>Avocado at i_start=1</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.1/avocado_900.jpg">
+            <figcaption>Avocado at i_start=3</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.1/avocado_840.jpg">
+            <figcaption>Avocado at i_start=5</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.1/avocado_780.jpg">
+            <figcaption>Avocado at i_start=7</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.1/avocado_690.jpg">
+            <figcaption>Avocado at i_start=10</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.1/avocado_390.jpg">
+            <figcaption>Avocado at i_start=20</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid-1">
+        <figure>
+            <img src="images/output/1.7.1/bee_original.jpg">
+            <figcaption>The original image</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid-3">
+        <figure>
+            <img src="images/output/1.7.1/bee_960.jpg">
+            <figcaption>Bee at i_start=1</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.1/bee_900.jpg">
+            <figcaption>Bee at i_start=3</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.1/bee_840.jpg">
+            <figcaption>Bee at i_start=5</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.1/bee_780.jpg">
+            <figcaption>Bee at i_start=7</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.1/bee_690.jpg">
+            <figcaption>Bee at i_start=10</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.1/bee_390.jpg">
+            <figcaption>Bee at i_start=20</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid-1">
+        <figure>
+            <img src="images/output/1.7.1/guy_original.jpg">
+            <figcaption>The original image</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid-3">
+        <figure>
+            <img src="images/output/1.7.1/guy_960.jpg">
+            <figcaption>Guy at i_start=1</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.1/guy_900.jpg">
+            <figcaption>Guy at i_start=3</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.1/guy_840.jpg">
+            <figcaption>Guy at i_start=5</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.1/guy_780.jpg">
+            <figcaption>Guy at i_start=7</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.1/guy_690.jpg">
+            <figcaption>Guy at i_start=10</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.1/guy_390.jpg">
+            <figcaption>Guy at i_start=20</figcaption>
+        </figure>
+    </div>
+
+
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>1.7.2: Inpainting</h2>
+
+    <p>We can use the same procedure to implement inpainting.</p>
+
+    <div class="image-grid-3">
+        <figure>
+            <img src="images/output/test_image.jpg">
+            <figcaption>The original image</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.2/mask.jpg">
+            <figcaption>The mask</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.2/inpainting_campanile.jpg">
+            <figcaption>Campanile inpainted</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.2/cat_original.jpg">
+            <figcaption>The original image</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.2/cat_mask.jpg">
+            <figcaption>The mask</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.2/inpainting_cat.jpg">
+            <figcaption>Cat inpainted</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.2/dog_original.jpg">
+            <figcaption>The original image</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.2/dog_mask.jpg">
+            <figcaption>The mask</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.2/inpainting_dog.jpg">
+            <figcaption>Dog inpainted</figcaption>
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>1.7.3: Text-Conditional Image-to-image Translation</h2>
+
+    <p>Now, we will do the same thing as SDEdit, but guide the projection with a text prompt.</p>
+
+    <div class="image-grid-1">
+        <figure>
+            <img src="images/output/test_image.jpg">
+            <figcaption>The original image</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid-3">
+        <figure>
+            <img src="images/output/1.7.3/rocket_960.jpg">
+            <figcaption>Rocket at noise level 3</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.3/rocket_900.jpg">
+            <figcaption>Rocket at noise level 5</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.3/rocket_840.jpg">
+            <figcaption>Rocket at noise level 7</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.3/rocket_780.jpg">
+            <figcaption>Rocket at noise level 10</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.3/rocket_690.jpg">
+            <figcaption>Rocket at noise level 1</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.3/rocket_390.jpg">
+            <figcaption>Rocket at noise level 20</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid-1">
+        <figure>
+            <img src="images/output/1.7.1/avo_original.jpg">
+            <figcaption>The original image</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid-3">
+        <figure>
+            <img src="images/output/1.7.3/avo_960.jpg">
+            <figcaption>Coast at noise level 3</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.3/avo_900.jpg">
+            <figcaption>Coast at noise level 5</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.3/avo_840.jpg">
+            <figcaption>Coast at noise level 7</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.3/avo_780.jpg">
+            <figcaption>Coast at noise level 10</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.3/avo_690.jpg">
+            <figcaption>Coast at noise level 1</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.3/avo_390.jpg">
+            <figcaption>Coast at noise level 20</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid-1">
+        <figure>
+            <img src="images/output/1.7.3/steve_original.jpg">
+            <figcaption>The original image</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid-3">
+        <figure>
+            <img src="images/output/1.7.3/steve_960.jpg">
+            <figcaption>Coast at noise level 3</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.3/steve_900.jpg">
+            <figcaption>Coast at noise level 5</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.3/steve_840.jpg">
+            <figcaption>Coast at noise level 7</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.3/steve_780.jpg">
+            <figcaption>Coast at noise level 10</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.3/steve_690.jpg">
+            <figcaption>Coast at noise level 1</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.7.3/steve_390.jpg">
+            <figcaption>Coast at noise level 20</figcaption>
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>1.8: Visual Anagrams</h2>
+
+    <p>In this part, we will create an image that looks like "an oil painting of people around a campfire", but when flipped upside down will reveal "an oil painting of an old man".</p>
+
+    <div class="image-grid-3">
+        <figure>
+            <img src="images/output/1.8/anagram_test.jpg">
+            <figcaption>an oil painting of an old man</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.8/anagram_2.jpg">
+            <figcaption>a man wearing a hat</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.8/anagram_3.jpg">
+            <figcaption>a photo of the amalfi cost</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.8/anagram_flipped.jpg">
+            <figcaption>an oil painting of people around a campfire</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.8/anagram_2_flipped.jpg">
+            <figcaption>a rocket ship</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.8/anagram_3_flipped.jpg">
+            <figcaption>a photo of a dog</figcaption>
+        </figure>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <h2>1.9: Hybrid Images</h2>
+
+    <p>In this part we'll implement Factorized Diffusion and create hybrid images just like in project 2.</p>
+
+    <div class="image-grid-2">
+        <figure>
+            <img src="images/output/1.9/hybrid.jpg">
+            <figcaption>Hybrid image of a skull and a waterfall</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.9/hybrid_2.0.jpg">
+            <figcaption>Hybrid image of a skull and a waterfall</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.9/hybrid_3.jpg">
+            <figcaption>Hybrid image of a barista and an old man</figcaption>
+        </figure>
+        <figure>
+            <img src="images/output/1.9/hybrid_3_test.jpg">
+            <figcaption>Hybrid image of a barista and an old man</figcaption>
+        </figure>
+    </div>
+
+    <div class="image-grid-1">
+        <figure>
+            <img src="images/output/1.9/hybrid_2.jpg">
+            <figcaption>Hybrid image of an old man and a skull</figcaption>
+        </figure>
+    </div>
+
+
+</body>
+</html>
