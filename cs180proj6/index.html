@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180 final project</title>
+    <title>Custom Fonts</title>
+    <style>
+        body {
+            font-family: 'Garamond';
+            margin-left: 10%;
+            margin-right: 10%;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        p {
+            text-align: left;
+        }
+
+        .image-container {
+            text-align: center;
+        }
+
+        .image-container img {
+            width: 1000px;
+            display: inline-block;
+        }
+
+        .image-grid-1 {
+            justify-items: center;
+        }
+
+        .image-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            justify-items: center;
+        }
+
+        .image-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            justify-items: center;
+        }
+
+        .image-grid-5 {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-grid-6 {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-grid-1 img {
+            width: 200px;
+            height: auto;
+            object-fit: cover;       
+        }
+
+        .image-grid-2 img {
+            width: 500px;
+            height: auto;
+            object-fit: cover;        
+        }
+
+        .image-grid-3 img {
+            width: 200px;
+            height: auto;
+            object-fit: cover;   
+        }
+
+        .image-grid-4 img {
+            width: 200px;
+            height: auto;
+            object-fit: cover;   
+        }
+        
+        .image-grid-5 img {
+            width: 200px;
+            height: auto;
+            object-fit: cover;        
+        }
+
+        .image-grid-6 img {
+            width: 200px;
+            height: auto;
+            object-fit: cover;        
+        }
+
+        .small-image {
+            height: 30%;
+        }
+            
+        figure {
+            text-align: center;
+        }
+
+    </style>
+    </style>
+</head>
+<body>
+    <h1>CS 180 Final Project</h1>
+    <h3>Kevin Sheng</h3>
+    <hr>
+    <h1>High Dynamic Range Images</h1>
+
+    <h2>Project Overview</h2>
+    <p>Modern cameras are unable to capture the full dynamic range of commonly encountered real-world scenes. In some scenes, even the best possible photograph will be partially under or over-exposed. Researchers and photographers commonly get around this limitation by combining information from multiple exposures of the same scene. You will write software to automatically combine multiple exposures into a single high dynamic range radiance map, and then convert this radiance map to an image suitable for display through tone mapping. 
+    </p>
+
+    <br>
+    <hr>
+    <br>
+
+
+    <h2>Radiance Reconstruction</h2>
+
+    <p>The following is a typical set of image, shot from the same angle but with different shutter speeds.</p>
+
+    <div class="image-grid-2">
+        <figure>
+            <img src="images/data/arch/17_1.jpg">
+            <figcaption>Exposure: 17.0s</figcaption>
+        </figure>
+        <figure>
+            <img src="images/data/arch/3_1.jpg">
+            <figcaption>Exposure: 3.0s</figcaption>
+        </figure>
+        <figure>
+            <img src="images/data/arch/1_4.jpg">
+            <figcaption>Exposure: 0.25s</figcaption>
+
+        </figure>
+        <figure>
+            <img src="images/data/arch/1_25.jpg">
+            <figcaption>Exposure: 0.04s</figcaption>
+
+        </figure>
+    </div>
+
+    <p>To start off, we first get the radiance map of the set of images. To do so, we utilize the function provided in Debevec.</p>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/results/func.jpg">
+            <figcaption>The recovered relationship between exposure and pixel values</figcaption>
+        </figure>
+    </div>
+
+    <br>
+
+    <p>Once the function above is estimated, we can obtain the estimated radiance map from it.</p>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/results/arch_radiance.jpg">
+            <figcaption>The recovered relationship between exposure and pixel values</figcaption>
+        </figure>
+    </div>
+
+
+
+
+    <br>
+    <hr>
+    <br>
+
+
+    <h2>Tone Mapping</h2>
+
+    <p>Getting the radiance map is only half the battle. To represent the image clear, we want to tone-map the radiance so the dynamic range is properly represented. One way of achieving this is through a simple global tone mapping function that stretches the radiance to [0, 255]. 
+        Another way of doing this is to use the method outlined in Durand.
+    </p>
+
+    <br>
+
+    <div class="image-container">
+        <figure>
+            <img src="images/results/arch_details.jpg">
+            <figcaption>The details from the Durand process</figcaption>
+        </figure>
+    </div>
+
+    <br>
+
+    <h2>End Results</h2>
+
+
+    <div class="image-grid-2">
+        <figure>
+            <img src="images/results/simple_arch.jpg">
+            <figcaption>Global Simple [Arch]</figcaption>
+        </figure>
+        <figure>
+            <img src="images/results/durand_arch.jpg">
+            <figcaption>Durand [Arch]</figcaption>
+        </figure>
+        <figure>
+            <img src="images/results/simple_bonsai.jpg">
+            <figcaption>Global Simple [Bonsai]</figcaption>
+        </figure>
+        <figure>
+            <img src="images/results/durand_bonsai.jpg">
+            <figcaption>Durand [Bonsai]</figcaption>
+        </figure>
+        <figure>
+            <img src="images/results/simple_chapel.jpg">
+            <figcaption>Global Simple [Chapel]</figcaption>
+        </figure>
+        <figure>
+            <img src="images/results/durand_chapel.jpg    ">
+            <figcaption>Durand [Chapel]</figcaption>
+        </figure>
+        <figure>
+            <img src="images/results/simple_garage.jpg">
+            <figcaption>Global Simple [Garage]</figcaption>
+        </figure>
+        <figure>
+            <img src="images/results/durand_garage.jpg    ">
+            <figcaption>Durand [Garage]</figcaption>
+        </figure>
+        <figure>
+            <img src="images/results/simple_garden.jpg">
+            <figcaption>Global Simple [Garden]</figcaption>
+        </figure>
+        <figure>
+            <img src="images/results/durand_garden.jpg    ">
+            <figcaption>Durand [Garden]</figcaption>
+        </figure>
+        <figure>
+            <img src="images/results/simple_house.jpg">
+            <figcaption>Global Simple [House]</figcaption>
+        </figure>
+        <figure>
+            <img src="images/results/durand_house.jpg    ">
+            <figcaption>Durand [House]</figcaption>
+        </figure>
+        <figure>
+            <img src="images/results/simple_mug.jpg">
+            <figcaption>Global Simple [Mug]</figcaption>
+        </figure>
+        <figure>
+            <img src="images/results/durand_mug.jpg    ">
+            <figcaption>Durand [Mug]</figcaption>
+        </figure>
+        <figure>
+            <img src="images/results/simple_window.jpg">
+            <figcaption>Global Simple [Window]</figcaption>
+        </figure>
+        <figure>
+            <img src="images/results/durand_window.jpg    ">
+            <figcaption>Durand [Window]</figcaption>
+        </figure>
+    </div>
+
+</body>
+</html>
